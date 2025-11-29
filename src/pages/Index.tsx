@@ -1,3 +1,4 @@
+import { PageLayout } from "@/components/PageLayout";
 import { 
   LayoutDashboard, 
   Workflow, 
@@ -12,8 +13,6 @@ import {
   CheckCircle2,
   AlertCircle
 } from "lucide-react";
-import { Sidebar } from "@/components/Sidebar";
-import { Header } from "@/components/Header";
 import { FeatureCard } from "@/components/FeatureCard";
 import { StatCard } from "@/components/StatCard";
 
@@ -70,12 +69,8 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Sidebar />
-      <Header />
-      
-      <main className="ml-64 pt-16">
-        <div className="p-8">
+    <PageLayout>
+      <div className="p-8">
           {/* Hero Section */}
           <div className="mb-8">
             <div className="relative overflow-hidden rounded-2xl glass p-8 mb-8">
@@ -192,9 +187,8 @@ const Index = () => {
             </div>
           </div>
         </div>
-      </main>
-    </div>
-  );
-};
-
-export default Index;
+      </PageLayout>
+    );
+  };
+  
+  export default Index;
