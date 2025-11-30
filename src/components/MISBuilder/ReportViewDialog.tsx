@@ -1,7 +1,9 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { BarChart3, LineChart, PieChart, TrendingUp } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { BarChart3, LineChart, PieChart, TrendingUp, Calendar, Users, Clock } from "lucide-react";
 import { BarChart, Bar, LineChart as RechartsLineChart, Line, PieChart as RechartsPieChart, Pie, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { AIInsightsPanel } from "./AIInsightsPanel";
 
 interface ReportViewDialogProps {
   open: boolean;
@@ -11,52 +13,57 @@ interface ReportViewDialogProps {
     type: string;
     chartType: string;
     lastUpdated?: string;
+    description?: string;
+    aiEnabled?: boolean;
+    scheduled?: boolean;
+    scheduleFrequency?: string;
+    roleLevel?: string;
   } | null;
 }
 
-// Sample data for different charts
+// Sample data for different charts - ticketing focused
 const barData = [
-  { name: "Mon", tickets: 45, resolved: 38 },
-  { name: "Tue", tickets: 52, resolved: 48 },
-  { name: "Wed", tickets: 38, resolved: 35 },
-  { name: "Thu", tickets: 61, resolved: 55 },
-  { name: "Fri", tickets: 48, resolved: 42 },
-  { name: "Sat", tickets: 25, resolved: 23 },
-  { name: "Sun", tickets: 18, resolved: 16 },
+  { name: "Mon", created: 87, resolved: 82, pending: 5 },
+  { name: "Tue", created: 94, resolved: 89, pending: 10 },
+  { name: "Wed", created: 76, resolved: 81, pending: 5 },
+  { name: "Thu", created: 103, resolved: 98, pending: 15 },
+  { name: "Fri", created: 91, resolved: 86, pending: 20 },
+  { name: "Sat", created: 42, resolved: 38, pending: 24 },
+  { name: "Sun", created: 28, resolved: 31, pending: 21 },
 ];
 
 const lineData = [
-  { month: "Jan", performance: 85, target: 90 },
-  { month: "Feb", performance: 88, target: 90 },
-  { month: "Mar", performance: 82, target: 90 },
-  { month: "Apr", performance: 92, target: 90 },
-  { month: "May", performance: 95, target: 90 },
-  { month: "Jun", performance: 91, target: 90 },
+  { month: "Jan", slaCompliance: 89, target: 95, avgResolutionHrs: 4.2 },
+  { month: "Feb", slaCompliance: 92, target: 95, avgResolutionHrs: 3.8 },
+  { month: "Mar", slaCompliance: 87, target: 95, avgResolutionHrs: 4.5 },
+  { month: "Apr", slaCompliance: 94, target: 95, avgResolutionHrs: 3.5 },
+  { month: "May", slaCompliance: 96, target: 95, avgResolutionHrs: 3.2 },
+  { month: "Jun", slaCompliance: 94, target: 95, avgResolutionHrs: 3.6 },
 ];
 
 const pieData = [
-  { name: "Hardware", value: 35, color: "hsl(var(--chart-1))" },
-  { name: "Software", value: 28, color: "hsl(var(--chart-2))" },
-  { name: "Network", value: 22, color: "hsl(var(--chart-3))" },
-  { name: "Access", value: 15, color: "hsl(var(--chart-4))" },
+  { name: "Hardware Issues", value: 145, color: "hsl(var(--chart-1))" },
+  { name: "Software Support", value: 116, color: "hsl(var(--chart-2))" },
+  { name: "Network Problems", value: 91, color: "hsl(var(--chart-3))" },
+  { name: "Access Requests", value: 62, color: "hsl(var(--chart-4))" },
+  { name: "Other", value: 38, color: "hsl(var(--chart-5))" },
 ];
 
 const areaData = [
-  { time: "00:00", incidents: 5 },
-  { time: "04:00", incidents: 3 },
-  { time: "08:00", incidents: 15 },
-  { time: "12:00", incidents: 25 },
-  { time: "16:00", incidents: 18 },
-  { time: "20:00", incidents: 10 },
-  { time: "24:00", incidents: 6 },
+  { time: "Week 1", avgHours: 4.5, critical: 2, high: 8, medium: 15, low: 25 },
+  { time: "Week 2", avgHours: 4.2, critical: 3, high: 7, medium: 18, low: 22 },
+  { time: "Week 3", avgHours: 3.8, critical: 1, high: 9, medium: 16, low: 24 },
+  { time: "Week 4", avgHours: 3.5, critical: 2, high: 6, medium: 17, low: 25 },
 ];
 
 const chartConfig = {
-  tickets: { label: "Tickets", color: "hsl(var(--primary))" },
+  created: { label: "Created", color: "hsl(var(--primary))" },
   resolved: { label: "Resolved", color: "hsl(var(--chart-2))" },
-  performance: { label: "Performance", color: "hsl(var(--primary))" },
+  pending: { label: "Pending", color: "hsl(var(--warning))" },
+  slaCompliance: { label: "SLA %", color: "hsl(var(--primary))" },
   target: { label: "Target", color: "hsl(var(--chart-3))" },
-  incidents: { label: "Incidents", color: "hsl(var(--primary))" },
+  avgResolutionHrs: { label: "Avg Hours", color: "hsl(var(--chart-4))" },
+  avgHours: { label: "Avg Resolution Time", color: "hsl(var(--primary))" },
 };
 
 export const ReportViewDialog = ({ open, onOpenChange, report }: ReportViewDialogProps) => {
@@ -74,8 +81,9 @@ export const ReportViewDialog = ({ open, onOpenChange, report }: ReportViewDialo
                 <YAxis className="text-xs" />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Legend />
-                <Bar dataKey="tickets" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="created" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="resolved" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="pending" fill="hsl(var(--warning))" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </ChartContainer>
@@ -91,7 +99,7 @@ export const ReportViewDialog = ({ open, onOpenChange, report }: ReportViewDialo
                 <YAxis className="text-xs" />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Legend />
-                <Line type="monotone" dataKey="performance" stroke="hsl(var(--primary))" strokeWidth={2} />
+                <Line type="monotone" dataKey="slaCompliance" stroke="hsl(var(--primary))" strokeWidth={2} />
                 <Line type="monotone" dataKey="target" stroke="hsl(var(--chart-3))" strokeWidth={2} strokeDasharray="5 5" />
               </RechartsLineChart>
             </ResponsiveContainer>
@@ -133,7 +141,7 @@ export const ReportViewDialog = ({ open, onOpenChange, report }: ReportViewDialo
                 <XAxis dataKey="time" className="text-xs" />
                 <YAxis className="text-xs" />
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <Area type="monotone" dataKey="incidents" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.3} />
+                <Area type="monotone" dataKey="avgHours" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.3} />
               </AreaChart>
             </ResponsiveContainer>
           </ChartContainer>
@@ -150,32 +158,85 @@ export const ReportViewDialog = ({ open, onOpenChange, report }: ReportViewDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl">{report.name}</DialogTitle>
-          <DialogDescription>
-            {report.type} • {report.lastUpdated || "Just created"}
-          </DialogDescription>
+          <div className="flex items-start justify-between">
+            <div>
+              <DialogTitle className="text-2xl flex items-center gap-2">
+                {report.name}
+                {report.aiEnabled && (
+                  <Badge variant="secondary" className="gap-1">
+                    <BarChart3 className="h-3 w-3" />
+                    AI-Powered
+                  </Badge>
+                )}
+                {report.scheduled && (
+                  <Badge variant="outline" className="gap-1">
+                    <Calendar className="h-3 w-3" />
+                    Auto-Generated
+                  </Badge>
+                )}
+              </DialogTitle>
+              <DialogDescription className="mt-2 space-y-1">
+                <div>{report.type} • {report.lastUpdated || "Just created"}</div>
+                {report.description && (
+                  <div className="text-sm">{report.description}</div>
+                )}
+                {report.roleLevel && report.roleLevel !== "all" && (
+                  <Badge variant="outline" className="gap-1 mt-1">
+                    <Users className="h-3 w-3" />
+                    {report.roleLevel.charAt(0).toUpperCase() + report.roleLevel.slice(1)} View
+                  </Badge>
+                )}
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
         
         <div className="mt-6">
           {renderChart()}
         </div>
 
-        <div className="grid grid-cols-3 gap-4 mt-6">
+        <div className="grid grid-cols-4 gap-4 mt-6">
           <div className="glass p-4 rounded-lg">
-            <p className="text-sm text-muted-foreground mb-1">Total Records</p>
-            <p className="text-2xl font-bold text-gradient">1,248</p>
+            <div className="flex items-center gap-2 mb-1">
+              <BarChart3 className="h-4 w-4 text-primary" />
+              <p className="text-sm text-muted-foreground">Total Tickets</p>
+            </div>
+            <p className="text-2xl font-bold text-gradient">2,456</p>
+            <p className="text-xs text-muted-foreground mt-1">This month</p>
           </div>
           <div className="glass p-4 rounded-lg">
-            <p className="text-sm text-muted-foreground mb-1">Average</p>
-            <p className="text-2xl font-bold text-gradient">87.5%</p>
+            <div className="flex items-center gap-2 mb-1">
+              <TrendingUp className="h-4 w-4 text-success" />
+              <p className="text-sm text-muted-foreground">Resolved</p>
+            </div>
+            <p className="text-2xl font-bold text-success">94.2%</p>
+            <p className="text-xs text-muted-foreground mt-1">+5.3% vs last month</p>
           </div>
           <div className="glass p-4 rounded-lg">
-            <p className="text-sm text-muted-foreground mb-1">Trend</p>
-            <p className="text-2xl font-bold text-success">+12.3%</p>
+            <div className="flex items-center gap-2 mb-1">
+              <Clock className="h-4 w-4 text-primary" />
+              <p className="text-sm text-muted-foreground">Avg Resolution</p>
+            </div>
+            <p className="text-2xl font-bold text-gradient">3.6 hrs</p>
+            <p className="text-xs text-success mt-1">-18% improvement</p>
+          </div>
+          <div className="glass p-4 rounded-lg">
+            <div className="flex items-center gap-2 mb-1">
+              <Users className="h-4 w-4 text-primary" />
+              <p className="text-sm text-muted-foreground">Active Agents</p>
+            </div>
+            <p className="text-2xl font-bold text-gradient">42/45</p>
+            <p className="text-xs text-muted-foreground mt-1">93% utilization</p>
           </div>
         </div>
+
+        {report.aiEnabled && (
+          <div className="mt-6">
+            <AIInsightsPanel reportType={report.chartType} />
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
