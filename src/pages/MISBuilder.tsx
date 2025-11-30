@@ -15,45 +15,77 @@ interface Report {
   lastUpdated: string;
   icon: any;
   description?: string;
+  aiEnabled?: boolean;
+  scheduled?: boolean;
+  scheduleFrequency?: string;
+  roleLevel?: string;
 }
 
 const MISBuilder = () => {
   const [reports, setReports] = useState<Report[]>([
     { 
       id: "1",
-      name: "SLA Compliance", 
+      name: "Daily Ticket Activity", 
       type: "Dashboard", 
       chartType: "bar",
-      lastUpdated: "2 hours ago", 
+      lastUpdated: "Auto-generated at 9:00 AM", 
       icon: BarChart3,
-      description: "Monitor service level agreement compliance across teams"
+      description: "Daily overview of ticket creation, resolution, and agent activity",
+      aiEnabled: true,
+      scheduled: true,
+      scheduleFrequency: "daily",
+      roleLevel: "all"
     },
     { 
       id: "2",
-      name: "Team Performance", 
+      name: "SLA Performance", 
       type: "Report", 
       chartType: "line",
-      lastUpdated: "1 day ago", 
+      lastUpdated: "Updated 5 mins ago", 
       icon: TrendingUp,
-      description: "Track team performance metrics and trends"
+      description: "Track SLA compliance rates, breaches, and response times",
+      aiEnabled: true,
+      scheduled: true,
+      scheduleFrequency: "hourly",
+      roleLevel: "manager"
     },
     { 
       id: "3",
-      name: "Ticket Distribution", 
+      name: "Ticket by Category", 
       type: "Chart", 
       chartType: "pie",
-      lastUpdated: "3 hours ago", 
+      lastUpdated: "Live data", 
       icon: PieChart,
-      description: "Analyze ticket distribution by category"
+      description: "Real-time breakdown: Hardware (35%), Software (28%), Network (22%), Access (15%)",
+      aiEnabled: true,
+      scheduled: false,
+      roleLevel: "all"
     },
     { 
       id: "4",
-      name: "Resolution Trends", 
+      name: "Resolution Time Trends", 
       type: "Analytics", 
       chartType: "area",
-      lastUpdated: "5 hours ago", 
+      lastUpdated: "Weekly report", 
       icon: LineChart,
-      description: "View resolution time trends over time"
+      description: "AI-powered analysis of ticket resolution patterns and bottlenecks",
+      aiEnabled: true,
+      scheduled: true,
+      scheduleFrequency: "weekly",
+      roleLevel: "admin"
+    },
+    { 
+      id: "5",
+      name: "Agent Performance", 
+      type: "Dashboard", 
+      chartType: "bar",
+      lastUpdated: "Auto-generated at 9:00 AM", 
+      icon: Activity,
+      description: "Individual and team metrics: tickets resolved, avg response time, satisfaction scores",
+      aiEnabled: true,
+      scheduled: true,
+      scheduleFrequency: "daily",
+      roleLevel: "lead"
     },
   ]);
 
@@ -65,6 +97,10 @@ const MISBuilder = () => {
     type: string;
     chartType: string;
     description: string;
+    aiEnabled: boolean;
+    scheduled: boolean;
+    scheduleFrequency: string;
+    roleLevel: string;
   }) => {
     const iconMap: { [key: string]: any } = {
       bar: BarChartIcon,
@@ -103,8 +139,10 @@ const MISBuilder = () => {
       <div className="p-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2">MIS Builder</h1>
-            <p className="text-muted-foreground">Create dashboards, charts, and custom reports</p>
+            <h1 className="text-3xl font-bold mb-2">AI MIS Builder</h1>
+            <p className="text-muted-foreground">
+              Automated report generation with AI insights, anomaly detection, and smart scheduling
+            </p>
           </div>
           <CreateReportDialog onCreateReport={handleCreateReport} />
         </div>
